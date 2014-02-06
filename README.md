@@ -3,7 +3,7 @@ hadoop-devtest
 
 Setup Instructions (tested on Ubuntu 12.04):
 
-1. Install Cloudera's Hadoop dist3 version 0.20, the steps to do that are follows. Create a `/etc/apt/sources.list.d/cloudera.list` with the following contents:
+1) Install Cloudera's Hadoop dist3 version 0.20, the steps to do that are as follows. Create a `/etc/apt/sources.list.d/cloudera.list` with the following contents:
 
 `deb http://archive.cloudera.com/debian REL-cdh3 contrib`
 `deb-src http://archive.cloudera.com/debian REL-cdh3 contrib`
@@ -29,7 +29,7 @@ You can check Hadoop’s health in a web-based panel available at:
 `http://localhost:50070/dfshealth.jsp`
 `http://localhost:50030/jobtracker.jsp`
 
-2. Clone the project. It has a folder named devtest, which is a maven project, and can be built from the commandline using familiar maven commands like
+2) Clone the project. It has a folder named devtest, which is a maven project, and can be built from the commandline using familiar maven commands like
 
 `mvn clean package`
 
