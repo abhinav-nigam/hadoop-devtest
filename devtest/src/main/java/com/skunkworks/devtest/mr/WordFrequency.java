@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -48,7 +48,7 @@ public class WordFrequency extends Configured implements Tool {
 	 * Reducer class
 	 */
 	private static class WordFrequencyReducer extends
-			Reducer<Text, IntWritable, IntWritable, Text> {
+			Reducer<Text, IntWritable, Text, IntWritable> {
 
 		@Override
 		public void reduce(Text key, Iterable<IntWritable> values,
@@ -59,7 +59,7 @@ public class WordFrequency extends Configured implements Tool {
 				intCount += value.get();
 			}
 			count.set(intCount);
-			context.write(count, key);
+			context.write(key, count);
 		}
 	}
 
@@ -68,8 +68,7 @@ public class WordFrequency extends Configured implements Tool {
 	 */
 	public static void main(String[] args) {
 		try {
-			System.exit(ToolRunner.run(new Configuration(),
-					new WordFrequency(), args));
+			ToolRunner.run(new Configuration(), new WordFrequency(), args);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -96,7 +95,7 @@ public class WordFrequency extends Configured implements Tool {
 		fs.delete(out,true);
 		
 		FileOutputFormat.setOutputPath(job, out);
-		job.setOutputFormatClass(TextOutputFormat.class);
+		job.setOutputFormatClass(SequenceFileOutputFormat.class);
 		
 		return job.waitForCompletion(true) ? 0 : 1;
 	}

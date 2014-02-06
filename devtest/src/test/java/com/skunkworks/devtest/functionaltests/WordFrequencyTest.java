@@ -31,7 +31,8 @@ public class WordFrequencyTest {
 	public static void runHadoopJobs() throws IOException, URISyntaxException {
 		conf = new Configuration();
 		fs = FileSystem.get(conf);
-		URI uri = WordFrequencyTest.class.getClass().getResource("/data/wordfrequency.txt").toURI();
+		URI uri = WordFrequencyTest.class.getClass()
+				.getResource("/data/wordfrequency.txt").toURI();
 		createInputInFs(uri, inputFsPath);
 
 		String[] args = new String[3];
@@ -42,7 +43,7 @@ public class WordFrequencyTest {
 	}
 
 	@Test
-	public void testMain() throws IOException {
+	public void testWordFrequency() throws IOException {
 		Map<String, Integer> map = getHadoopOutputAsMap(new Path(outputFsPath));
 		assertEquals(map.get("which"), new Integer(8));
 	}
@@ -63,11 +64,14 @@ public class WordFrequencyTest {
 		IntWritable value = new IntWritable();
 		for (FileStatus status : fs.listStatus(outputPath)) {
 			Path path = status.getPath();
-			SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-			while (reader.next(key, value)) {
-				ret.put(key.toString(), value.get());
+			if (!path.getName().contains("SUCCESS")) {
+				SequenceFile.Reader reader = new SequenceFile.Reader(fs, path,
+						conf);
+				while (reader.next(key, value)) {
+					ret.put(key.toString(), value.get());
+				}
+				reader.close();
 			}
-			reader.close();
 		}
 		return ret;
 	}
