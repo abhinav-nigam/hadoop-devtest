@@ -24,10 +24,14 @@ To automatically launch Hadoop after reboot, also install the following packages
 
 `apt-get install hadoop-0.20-namenode hadoop-0.20-jobtracker hadoop-0.20-secondarynamenode hadoop-0.20-datanode hadoop-0.20-tasktracker`
 
+`sudo su hdfs`
+`hadoop namenode -format`
+
 You can check Hadoop’s health in a web-based panel available at:
 
 `http://localhost:50070/dfshealth.jsp`
 `http://localhost:50030/jobtracker.jsp`
+
 
 2) Clone the project. It has a folder named devtest, which is a maven project, and can be built from the commandline using familiar maven commands like
 
