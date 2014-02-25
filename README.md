@@ -8,7 +8,7 @@ Setup Instructions (tested on any system which support vagrant):
 
 1.5) vagrant ssh master , vagrant ssh hadoop1 .....
 
-2) ssh from 10.10.10.* -> 10.10.10.* to make sure there are no prompts when 
+2) ssh from 10.10.10.* -> 10.10.10.* to make sure there are no prompts when hadoop attempts to ssh for the first time.
 
 3) become root : sudo su
 
