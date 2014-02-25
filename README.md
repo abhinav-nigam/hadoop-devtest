@@ -2,6 +2,8 @@ hadoop-devtest
 ==============
 
 Setup Instructions (tested on any system which support vagrant):
+
+
 0) copy your id_rsa and id_rsa.pub to puppet/modules/hadoop/files
 
 1) vagrant up
