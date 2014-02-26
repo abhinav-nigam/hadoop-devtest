@@ -1,40 +1,25 @@
 hadoop-devtest
 ==============
 
-Setup Instructions (tested on Ubuntu 12.04):
-
-1) Install Cloudera's Hadoop dist3 version 0.20, the steps to do that are as follows. Create a `/etc/apt/sources.list.d/cloudera.list` with the following contents:
-
-`deb http://archive.cloudera.com/debian REL-cdh3 contrib`
-`deb-src http://archive.cloudera.com/debian REL-cdh3 contrib`
-
-Replace REL by the name of your distribution’s release, found by running:
-
-`lsb_release -c`
-
-Add the Cloudera signing key:
-
-`curl -s http://archive.cloudera.com/debian/archive.key | sudo apt-key add -`
-
-Then install Hadoop:
-
-`apt-get install hadoop-0.20 hadoop-0.20-conf-pseudo`
-
-To automatically launch Hadoop after reboot, also install the following packages:
-
-`apt-get install hadoop-0.20-namenode hadoop-0.20-jobtracker hadoop-0.20-secondarynamenode hadoop-0.20-datanode hadoop-0.20-tasktracker`
-
-`sudo su hdfs`
-`hadoop namenode -format`
-
-You can check Hadoop’s health in a web-based panel available at:
-
-`http://localhost:50070/dfshealth.jsp`
-`http://localhost:50030/jobtracker.jsp`
+Setup Instructions (tested on any system which support vagrant):
 
 
-2) Clone the project. It has a folder named devtest, which is a maven project, and can be built from the commandline using familiar maven commands like
+0) copy your id_rsa and id_rsa.pub to puppet/modules/hadoop/files
 
-`mvn clean package`
+1) vagrant up
 
-or imported to eclipse, and the junit tests can be simply run using the run directive.
+1.5) vagrant ssh master , vagrant ssh hadoop1 .....
+
+2) ssh from 10.10.10.* -> 10.10.10.* to make sure there are no prompts when hadoop attempts to ssh for the first time.
+
+3) become root : sudo su
+
+4) cd /opt/hadoop-1.2.1/bin && ./hadoop namenode -format 
+
+5) ./start-all.sh
+
+6) cd /vagrant/devtest [Assuming you did checkout this code, it should be available in a shared vagrant folder]
+
+7) mvn clean test. 
+
+If you run into issues with asm-3.1 jar, download and chepo it in the repo folder removing the previous text file maven thinks is a jar. 

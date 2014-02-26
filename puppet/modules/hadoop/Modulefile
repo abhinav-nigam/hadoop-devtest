@@ -1,0 +1,6 @@
+name         'hadoop'
+version      '0.0.1'
+author       'stmishra@fastmail.fm'
+license      'Apache 2.0'
+summary      'Puppet module for installing the hadoop build tool from the official distribution'
+description  'installs hadoop'
