@@ -17,23 +17,23 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define :master do |master|
-     master.vm.network :private_network, ip: "10.10.10.1"
+     master.vm.network :private_network, ip: "10.10.10.2"
   end
 
   config.vm.define :backup do |backup|
-    backup.vm.network :private_network, ip: "10.10.10.2"
+    backup.vm.network :private_network, ip: "10.10.10.3"
   end
  
   config.vm.define :hadoop1 do |hadoop1|
-    hadoop1.vm.network :private_network, ip: "10.10.10.3"
+    hadoop1.vm.network :private_network, ip: "10.10.10.4"
   end
  
   config.vm.define :hadoop2 do |hadoop2|
-    hadoop2.vm.network :private_network, ip: "10.10.10.4"
+    hadoop2.vm.network :private_network, ip: "10.10.10.5"
   end
  
   config.vm.define :hadoop3 do |hadoop3|
-    hadoop3.vm.network :private_network, ip: "10.10.10.5"
+    hadoop3.vm.network :private_network, ip: "10.10.10.6"
   end
 
 end

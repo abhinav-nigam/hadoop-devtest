@@ -3,7 +3,7 @@
 <configuration>
  <property>
   <name>mapred.job.tracker</name>
-  <value>10.10.10.1:9001</value>
+  <value>10.10.10.2:9001</value>
   <description>The host and port that the MapReduce job tracker runs at.</description>
  </property>
 </configuration>
