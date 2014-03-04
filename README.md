@@ -18,7 +18,7 @@ Setup Instructions (tested on any system which support vagrant http://www.vagran
 
 5) ./start-all.sh
 
-6) cd /vagrant/devtest [Assuming you did checkout this code, it should be available in a shared vagrant folder]
+6) clone the project and go to devtest dir
 
 7) mvn clean test. 
 
