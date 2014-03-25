@@ -1,0 +1,21 @@
+# #####################################################
+# Common Configuration for Data Crawler
+#######################################################
+
+# #####################################################
+# Target Marketplace that we need to crawl   ##########
+# #####################################################
+marketplaceName: ebay
+
+# #####################################################
+# Strategy used to crawl above mentioned marketplace  #
+# #####################################################
+strategyName: robotstxt
+
+# #####################################################
+# Strategy used to crawl above mentioned marketplace  #
+# #####################################################
+processingDir: C:\Users\AmitG\Downloads
+
+
+
