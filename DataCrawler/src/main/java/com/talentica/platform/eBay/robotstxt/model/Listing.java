@@ -7,6 +7,8 @@ import java.util.Dictionary;
  */
 public class Listing {
     private String itemId;
+    private String listingUrl;
+    private String imageUrl;
     private String title;
     private String categoryTree;
     private String itemCondition;
@@ -23,6 +25,22 @@ public class Listing {
     private String shipsTo;
     private Seller seller;
     private Dictionary<String, String> itemSpecifications;
+
+    public String getListingUrl() {
+        return listingUrl;
+    }
+
+    public void setListingUrl(String listingUrl) {
+        this.listingUrl = listingUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String getTitle() {
         return title;

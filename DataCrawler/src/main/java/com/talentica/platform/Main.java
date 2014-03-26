@@ -17,7 +17,7 @@ import java.nio.file.Paths;
  * Created by AmitG on 20-03-2014.
  */
 public class Main {
-    private static Logger logger = Logger.getLogger(Main.class);
+    private static Logger LOGGER = Logger.getLogger(Main.class);
 
     public static void main(String[] args) {
         DOMConfigurator.configure("log4j.xml");
@@ -42,7 +42,7 @@ public class Main {
             InputStream in = Files.newInputStream(Paths.get(args[0]));
             config = yaml.loadAs(in, CommonConfig.class);
         } catch (IOException e) {
-            System.out.print("Error in opening the file");
+            LOGGER.error("Error in opening the file");
         }
         return config;
     }

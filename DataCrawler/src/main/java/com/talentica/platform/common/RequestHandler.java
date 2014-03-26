@@ -59,7 +59,7 @@ public class RequestHandler {
     }
 
     public String getResponse(String url) {
-        StringBuilder response = new StringBuilder();
+        StringBuilder response = new StringBuilder("");
         BufferedReader in = null;
         try {
             URL website = new URL(url);

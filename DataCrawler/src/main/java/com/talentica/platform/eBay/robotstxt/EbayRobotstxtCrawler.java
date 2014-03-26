@@ -73,14 +73,14 @@ public class EbayRobotstxtCrawler extends EbayStrategyBase {
         long dataRetrieverThreadCount = Math.round((threadCount * DATA_EXTRACTOR_WEIGHTAGE)/100.0);
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
+        Runnable urlRetriever = new UrlRetriever(sitemapUrlsQueue, listingUrlsQueue, urlRetrieverThreadCount, isUrlRetrieverFinished, processingDir);
         for (int i = 0; i < urlRetrieverThreadCount; i++) {
-            Runnable worker = new UrlRetriever(sitemapUrlsQueue, listingUrlsQueue, urlRetrieverThreadCount, isUrlRetrieverFinished, processingDir);
-            executor.execute(worker);
+            executor.execute(urlRetriever);
         }
 
+        Runnable dataExtractor = new DataExtractor(listingUrlsQueue, isUrlRetrieverFinished, processingDir);
         for (int i = 0; i < dataRetrieverThreadCount; i++) {
-            Runnable worker = new DataExtractor(listingUrlsQueue, isUrlRetrieverFinished, processingDir);
-            executor.execute(worker);
+            executor.execute(dataExtractor);
         }
         executor.shutdown();
     }
