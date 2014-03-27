@@ -12,7 +12,7 @@ public class Listing {
     private String title;
     private String categoryTree;
     private String itemCondition;
-    private String compatibility;
+
     private String timeLeft;
     private String bidPrice;
     private int bidCount;
@@ -104,14 +104,6 @@ public class Listing {
 
     public void setItemCondition(String itemCondition) {
         this.itemCondition = itemCondition;
-    }
-
-    public String getCompatibility() {
-        return compatibility;
-    }
-
-    public void setCompatibility(String compatibility) {
-        this.compatibility = compatibility;
     }
 
     public String getTimeLeft() {

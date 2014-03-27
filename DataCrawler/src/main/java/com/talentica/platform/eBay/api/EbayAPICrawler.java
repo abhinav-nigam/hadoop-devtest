@@ -8,7 +8,7 @@ import com.talentica.platform.eBay.EbayStrategyBase;
  */
 public class EbayAPICrawler extends EbayStrategyBase {
 
-    public void start(CommonConfig commonConfig){
+    public void start(CommonConfig commonConfig) {
 
     }
 }

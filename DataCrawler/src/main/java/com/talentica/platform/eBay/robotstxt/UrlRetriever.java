@@ -1,6 +1,9 @@
 package com.talentica.platform.eBay.robotstxt;
 
 import com.talentica.platform.common.UrlDownloader;
+import com.talentica.platform.eBay.robotstxt.dao.listings.ListingDao;
+import com.talentica.platform.eBay.robotstxt.dao.sitemaps.Sitemap;
+import com.talentica.platform.eBay.robotstxt.dao.sitemaps.SitemapDao;
 import com.talentica.platform.eBay.robotstxt.model.Image;
 import com.talentica.platform.eBay.robotstxt.model.Url;
 import com.talentica.platform.eBay.robotstxt.model.UrlSet;
@@ -13,7 +16,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -25,54 +28,63 @@ public class UrlRetriever implements Runnable {
 
     private static Logger LOGGER = Logger.getLogger(UrlRetriever.class);
 
-    private ConcurrentLinkedQueue<String> sitemapUrlsQueue;
-    private ConcurrentLinkedQueue<String> listingUrlsQueue;
+    private ListingDao listingDao;
     private AtomicBoolean isUrlRetrieverFinished;
     private long totalThreads;
     private String processingDir;
+    private SitemapDao sitemapDao;
 
-    public UrlRetriever(ConcurrentLinkedQueue<String> sitemapUrlsQueue, ConcurrentLinkedQueue<String> listingUrlsQueue, long totalThreads, AtomicBoolean isUrlRetrieverFinished, String processingDir) {
-        this.sitemapUrlsQueue = sitemapUrlsQueue;
-        this.listingUrlsQueue = listingUrlsQueue;
+    public UrlRetriever(SitemapDao sitemapDao, ListingDao listingDao, long totalThreads, AtomicBoolean isUrlRetrieverFinished, String processingDir) {
+        this.listingDao = listingDao;
         this.isUrlRetrieverFinished = isUrlRetrieverFinished;
         this.totalThreads = totalThreads;
         this.processingDir = processingDir;
+        this.sitemapDao = sitemapDao;
     }
 
     @Override
     public void run() {
         while (true) {
-            if(!sitemapUrlsQueue.isEmpty()){
-                String loc = sitemapUrlsQueue.poll();
-                this.doWork(loc);
-            }else{
-                totalThreads-=1;
+            List<Sitemap> sitemapList = sitemapDao.getSitemapForProcessing(5);
+            if (!sitemapList.isEmpty()) {
+                for (Sitemap sitemap : sitemapList) {
+                    this.doWork(sitemap);
+                }
+            } else {
+                totalThreads -= 1;
                 break;
             }
         }
-        if(totalThreads ==0){
-            isUrlRetrieverFinished = new AtomicBoolean(true);
+        if (totalThreads == 0) {
+            isUrlRetrieverFinished.set(true);
         }
     }
 
-    private void doWork(String loc) {
-        LOGGER.debug("Started processing for url  : " + loc);
-        String destinationDir = processingDir + File.separator + "ebay";
-        LOGGER.debug("Download started for  : " + loc);
-        new UrlDownloader().fileDownload(loc, destinationDir);
-        LOGGER.debug("Download Finished for  : " + loc);
-        String strSourceFilePath = destinationDir + File.separatorChar + loc.substring(loc.lastIndexOf("/") + 1);
+    private void doWork(Sitemap sitemap) {
         try {
-            String extractedFilePath = ReadGZIP.unzipGZ(strSourceFilePath, destinationDir);
-            LOGGER.debug("Processing Started for  : " + loc);
-            this.processXml(extractedFilePath);
-            LOGGER.debug("Processing Finished for  : " + loc);
-        } catch (IOException ex) {
-            LOGGER.error("Error in Extracting file : " + strSourceFilePath + " :: " + ex.getMessage());
+            String loc = sitemap.getUrl();
+            LOGGER.debug("Started processing for url  : " + loc);
+            String destinationDir = processingDir + File.separator + "ebay";
+            LOGGER.debug("Download started for  : " + loc);
+            new UrlDownloader().fileDownload(loc, destinationDir);
+            LOGGER.debug("Download Finished for  : " + loc);
+            String strSourceFilePath = destinationDir + File.separatorChar + loc.substring(loc.lastIndexOf("/") + 1);
+            try {
+                String extractedFilePath = ReadGZIP.unzipGZ(strSourceFilePath, destinationDir);
+                LOGGER.debug("Processing Started for  : " + loc);
+                this.processXml(extractedFilePath);
+                LOGGER.debug("Processing Finished for  : " + loc);
+            } catch (IOException ex) {
+                LOGGER.error("Error in Extracting file : " + strSourceFilePath + " :: " + ex.getMessage());
+                throw ex;
+            }
+            sitemapDao.updateStatus(sitemap.getId(), 3);
+        } catch (Exception ex) {
+            sitemapDao.updateStatus(sitemap.getId(), 4);
         }
     }
 
-    private void processXml(String xmlFilePath) {
+    private void processXml(String xmlFilePath) throws Exception {
         try {
             File inputFile = new File(xmlFilePath);
             final JAXBContext context = JAXBContext.newInstance(UrlSet.class, Url.class, Image.class);
@@ -84,7 +96,11 @@ public class UrlRetriever implements Runnable {
                 for (Url url : urls) {
                     String loc = url.getLoc();
                     if (loc != null) {
-                        listingUrlsQueue.add(loc);
+                        try {
+                            listingDao.insertListingToQueue(loc, 1);
+                        } catch (Exception ex) {
+                            LOGGER.error(ex.getMessage());
+                        }
                     }
                 }
             }
@@ -92,6 +108,7 @@ public class UrlRetriever implements Runnable {
         } catch (Exception ex) {
             LOGGER.error("Error in processing xml file : " + xmlFilePath + " :: " + ex.getMessage());
             ex.printStackTrace();
+            throw ex;
         }
     }
 }

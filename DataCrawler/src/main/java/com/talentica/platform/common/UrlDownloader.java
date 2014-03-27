@@ -35,10 +35,10 @@ public class UrlDownloader {
             e.printStackTrace();
         } finally {
             try {
-                if(is != null) {
+                if (is != null) {
                     is.close();
                 }
-                if(outputStream != null) {
+                if (outputStream != null) {
                     outputStream.close();
                 }
             } catch (IOException e) {

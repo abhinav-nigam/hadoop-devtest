@@ -1,7 +1,6 @@
 package com.talentica.platform.eBay.robotstxt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.talentica.platform.common.RequestHandler;
+import com.talentica.platform.eBay.robotstxt.dao.listings.ListingDao;
 import com.talentica.platform.eBay.robotstxt.model.Listing;
 import com.talentica.platform.eBay.robotstxt.model.Seller;
 import org.apache.log4j.Logger;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -29,27 +27,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DataExtractor implements Runnable {
     private static Logger LOGGER = Logger.getLogger(DataExtractor.class);
 
-    private ConcurrentLinkedQueue<String> listingUrlsQueue;
+    private ListingDao listingDao;
     private AtomicBoolean isUrlRetrieverFinished;
     private String processingDir;
     private FileOutputStream fileOutputStream;
+    private final String DELIMITER = "\t";
+    private String outputDataFilePath;
 
-    public DataExtractor(ConcurrentLinkedQueue<String> listingUrlsQueue, AtomicBoolean isUrlRetrieverFinished, String processingDir) {
+    public DataExtractor(ListingDao listingDao, AtomicBoolean isUrlRetrieverFinished, String processingDir) {
 
-        this.listingUrlsQueue = listingUrlsQueue;
+        this.listingDao = listingDao;
         this.isUrlRetrieverFinished = isUrlRetrieverFinished;
         this.processingDir = processingDir;
-        this.createDataFile();
+        outputDataFilePath = this.createDataFile();
     }
-
 
     @Override
     public void run() {
         while (!isUrlRetrieverFinished.get()) {
             try {
-                if (!listingUrlsQueue.isEmpty()) {
-                    String url = listingUrlsQueue.poll();
-                    this.doWork(url);
+                List<com.talentica.platform.eBay.robotstxt.dao.listings.Listing> listings = listingDao.getListingsForProcessing(5);
+                if (!listings.isEmpty()) {
+                    for (com.talentica.platform.eBay.robotstxt.dao.listings.Listing listing : listings) {
+                        this.doWork(listing);
+                    }
                 } else {
                     Thread.sleep((long) 10);
                 }
@@ -59,16 +60,18 @@ public class DataExtractor implements Runnable {
         }
     }
 
-    private void doWork(String url) {
+    private void doWork(com.talentica.platform.eBay.robotstxt.dao.listings.Listing listing) {
+        String url = listing.getUrl();
         LOGGER.debug("Started Data Extraction for Listing Url : " + url);
         try {
             extractData(url);
+            listingDao.updateStatus(listing.getId(), 3);
         } catch (Exception ex) {
             ex.getMessage();
             ex.printStackTrace();
             LOGGER.error("Error in extracting data for url = " + url);
+            listingDao.updateStatus(listing.getId(), 4);
         }
-
         LOGGER.debug("Finished Data Extraction for Listing Url : " + url);
     }
 
@@ -163,11 +166,6 @@ public class DataExtractor implements Runnable {
 
             Dictionary<String, String> itemSpecifics = getItemSpecifics(rootHtml);
             listing.setItemSpecifications(itemSpecifics);
-
-            // TODO add logic to parse in csv
-//            ObjectMapper mapper = new ObjectMapper();
-//            FileOutputStream outStream = new FileOutputStream(new File("C:\\Users\\AmitG\\Downloads\\ebay\\data\\" + "amit.json"), true);
-//            mapper.writeValue(outStream, listing);
             writeListingToFile(listing);
         }
     }
@@ -224,34 +222,37 @@ public class DataExtractor implements Runnable {
         Dictionary<String, String> itemSpecifics = new Hashtable<String, String>();
         for (Object node : nodes) {
             TagNode tagNode = (TagNode) node;
-            List tables = tagNode.getElementListByName("table", true);
-            for (Object table : tables) {
-                TagNode tableTag = (TagNode) table;
-                List tdTags = tableTag.getElementListByName("td", true);
-                if (tableTag.getAttributeByName("id") != null && tableTag.getAttributeByName("id").equalsIgnoreCase("itmSellerDesc")) {
-                    List thTags = tableTag.getElementListByName("th", true);
-                    if (tdTags.size() == thTags.size()) {
-                        for (int k = 0; k < tdTags.size(); k += 1) {
-                            TagNode keyTag = (TagNode) thTags.get(k);
+            if (tagNode != null) {
+                tagNode = tagNode.getParent();
+                List tables = tagNode.getElementListByName("table", true);
+                for (Object table : tables) {
+                    TagNode tableTag = (TagNode) table;
+                    List tdTags = tableTag.getElementListByName("td", true);
+                    if (tableTag.getAttributeByName("id") != null && tableTag.getAttributeByName("id").equalsIgnoreCase("itmSellerDesc")) {
+                        List thTags = tableTag.getElementListByName("th", true);
+                        if (tdTags.size() == thTags.size()) {
+                            for (int k = 0; k < tdTags.size(); k += 1) {
+                                TagNode keyTag = (TagNode) thTags.get(k);
+                                String key = removeSpaces(keyTag.getText().toString());
+                                TagNode valueTag = (TagNode) tdTags.get(k);
+                                String value = removeSpaces(valueTag.getText().toString());
+
+                                itemSpecifics.put(key.substring(0, key.lastIndexOf(":")), value);
+                            }
+                        }
+                    } else {
+                        if (tdTags.size() % 2 != 0) {
+                            tdTags.remove(tdTags.size() - 1);
+                        }
+                        for (int k = 0; k < tdTags.size(); k += 2) {
+                            TagNode keyTag = (TagNode) tdTags.get(k);
                             String key = removeSpaces(keyTag.getText().toString());
-                            TagNode valueTag = (TagNode) tdTags.get(k);
+                            TagNode valueTag = (TagNode) tdTags.get(k + 1);
                             String value = removeSpaces(valueTag.getText().toString());
 
                             itemSpecifics.put(key.substring(0, key.lastIndexOf(":")), value);
+
                         }
-                    }
-                } else {
-                    if (tdTags.size() % 2 != 0) {
-                        tdTags.remove(tdTags.size() - 1);
-                    }
-                    for (int k = 0; k < tdTags.size(); k += 2) {
-                        TagNode keyTag = (TagNode) tdTags.get(k);
-                        String key = removeSpaces(keyTag.getText().toString());
-                        TagNode valueTag = (TagNode) tdTags.get(k + 1);
-                        String value = removeSpaces(valueTag.getText().toString());
-
-                        itemSpecifics.put(key.substring(0, key.lastIndexOf(":")), value);
-
                     }
                 }
             }
@@ -282,121 +283,120 @@ public class DataExtractor implements Runnable {
         return input;
     }
 
-    private synchronized void writeListingToFile(Listing listing) {
+    private synchronized void writeListingToFile(Listing listing) throws Exception {
         try {
-            this.fileOutputStream = new FileOutputStream(new File(processingDir + File.separator + "ebay" + File.separator + "data.txt"), true);
+            this.fileOutputStream = new FileOutputStream(new File(outputDataFilePath), true);
 
             StringBuilder headerBuilder = new StringBuilder("");
             headerBuilder.append(listing.getItemId());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getTitle());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getCategoryTree());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getItemCondition());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getListingUrl());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getImageUrl());
-            headerBuilder.append(" | ");
-            headerBuilder.append(listing.getCompatibility());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getTimeLeft());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getBidPrice());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getBidCount());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getShipping());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getDelivery());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getPaymentMethod());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getReturns());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getGuarantee());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getItemLocation());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getShipsTo());
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             if (listing.getSeller() != null) {
                 headerBuilder.append(listing.getSeller().getSellerName());
-                headerBuilder.append(" | ");
+                headerBuilder.append(DELIMITER);
                 headerBuilder.append(listing.getSeller().getRating());
-                headerBuilder.append(" | ");
+                headerBuilder.append(DELIMITER);
                 headerBuilder.append(listing.getSeller().getFeedback());
             } else {
                 headerBuilder.append("");
-                headerBuilder.append(" | ");
+                headerBuilder.append(DELIMITER);
                 headerBuilder.append("");
-                headerBuilder.append(" | ");
+                headerBuilder.append(DELIMITER);
                 headerBuilder.append("");
             }
-            headerBuilder.append(" | ");
+            headerBuilder.append(DELIMITER);
             headerBuilder.append(listing.getItemSpecifications());
             headerBuilder.append("\n");
             fileOutputStream.write(headerBuilder.toString().getBytes());
             fileOutputStream.close();
         } catch (IOException ex) {
             LOGGER.error("Error in writing data to data file");
+            throw ex;
         }
     }
 
-    private void createDataFile() {
+    private String createDataFile() {
+        File outputDataFile = null;
         try {
-            //TODO - read output file name from config
-            this.fileOutputStream = new FileOutputStream(new File(processingDir + File.separator + "ebay" + File.separator + "data.txt"), true);
+            outputDataFile = new File(processingDir + File.separator + "ebay" + File.separator + "data.xls");
+            this.fileOutputStream = new FileOutputStream(outputDataFile, true);
             this.writeHeadersToDataFile();
             fileOutputStream.close();
         } catch (IOException ex) {
             LOGGER.error("Error in creating output data file");
         }
+        return outputDataFile.getPath();
     }
 
     private void writeHeadersToDataFile() throws IOException {
         StringBuilder headerBuilder = new StringBuilder("");
         headerBuilder.append("Item Id");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Title");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Category Tree");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Item Condition");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Listing Url");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Image Url");
-        headerBuilder.append(" | ");
-        headerBuilder.append("Compatibility");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Time Left");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Bid Price");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Bid Count");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Shipping");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Delivery");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Payment Method");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Returns");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Guarantee");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Item Location");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Ships To");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Seller Name");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Seller Rating");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Seller Feedback");
-        headerBuilder.append(" | ");
+        headerBuilder.append(DELIMITER);
         headerBuilder.append("Item Specifications");
         headerBuilder.append("\n");
         fileOutputStream.write(headerBuilder.toString().getBytes());

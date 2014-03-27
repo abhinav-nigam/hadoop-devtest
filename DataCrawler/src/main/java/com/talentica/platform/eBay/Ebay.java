@@ -10,7 +10,7 @@ public class Ebay extends MarketplaceBase {
 
     public void crawl(CommonConfig commonConfig) {
         String strategyName = commonConfig.getStrategyName();
-        if(strategyName != null) {
+        if (strategyName != null) {
             EbayStrategyBase ebayStrategy = EbayStrategyFactory.getCrawler(strategyName);
             ebayStrategy.start(commonConfig);
         }

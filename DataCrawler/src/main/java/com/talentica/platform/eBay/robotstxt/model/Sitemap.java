@@ -1,7 +1,6 @@
 package com.talentica.platform.eBay.robotstxt.model;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Created by AmitG on 20-03-2014.

@@ -25,7 +25,7 @@ public class ReadGZIP {
         GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
         String inputFileName = inputFile.getName();
 
-        String destinationFilePath = destinationDir + File.separatorChar + inputFileName.substring(0,inputFileName.lastIndexOf("."));
+        String destinationFilePath = destinationDir + File.separatorChar + inputFileName.substring(0, inputFileName.lastIndexOf("."));
         File fout = new File(destinationFilePath);
         FileOutputStream fileOutputStream = new FileOutputStream(fout);
         for (int c = gzipInputStream.read(); c != -1; c = gzipInputStream.read()) {

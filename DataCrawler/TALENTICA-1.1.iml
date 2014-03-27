@@ -57,6 +57,11 @@
     <orderEntry type="library" name="Maven: javatar:javatar:2.5" level="project" />
     <orderEntry type="library" name="Maven: net.sourceforge.htmlcleaner:htmlcleaner:2.6" level="project" />
     <orderEntry type="library" name="Maven: org.jdom:jdom2:2.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.jdbi:jdbi:2.53" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.findbugs:annotations:2.0.2" level="project" />
+    <orderEntry type="library" name="Maven: me.shakiba.jdbi:jdbi-annotation:0.0.2" level="project" />
+    <orderEntry type="library" name="Maven: javax.persistence:persistence-api:1.0" level="project" />
+    <orderEntry type="library" name="Maven: postgresql:postgresql:9.1-901.jdbc4" level="project" />
   </component>
 </module>
 

@@ -29,6 +29,20 @@
             <artifactId>htmlcleaner</artifactId>
             <version>2.6</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.53</version>
+        </dependency>
+        <dependency>
+            <groupId>me.shakiba.jdbi</groupId>
+            <artifactId>jdbi-annotation</artifactId>
+            <version>0.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901.jdbc4</version>
+        </dependency>
     </dependencies>
 </project>

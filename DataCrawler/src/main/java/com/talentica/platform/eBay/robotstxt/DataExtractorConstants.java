@@ -20,7 +20,7 @@ public class DataExtractorConstants {
     public static final String XPATH_SELLER_NAME = "//div[@class='si-cnt si-cnt-eu vi-grBr vi-padn0 c-std']/div/div[@class='si-inner']/div[@class='si-content']/div[contains(@class,'bdg-')]/div[@class='mbg vi-VR-margBtm3']/a/span[@class='mbg-nw']|//div[@class='mbg vi-VR-margBtm3']/a/span[@class='mbg-nw']";
     public static final String XPATH_SELLER_RATING = "//div[@class='si-cnt si-cnt-eu vi-grBr vi-padn0 c-std']/div/div[@class='si-inner']/div[@class='si-content']/div[contains(@class,'bdg-')]/div[@class='mbg vi-VR-margBtm3']/span[@class='mbg-l']/a|//div[@class='mbg vi-VR-margBtm3']/span[@class='mbg-l']/a";
     public static final String XPATH_SELLER_FEEDBACK = "//div[@class='si-cnt si-cnt-eu vi-grBr vi-padn0 c-std']/div/div[@class='si-inner']/div[@class='si-content']/div[contains(@class,'bdg-')]/div[@id='si-fb']";
-    public static final String XPATH_ITEM_SPECIFICS = "//div[@id='vi-desc-maincntr']/div[@class='itemAttr']";
+    public static final String XPATH_ITEM_SPECIFICS = "//div[@class='section']/h2[@class='secHd']";
     public static final String XPATH_ITEM_IMAGE = "//img[@id='icImg']/@src";
 
 }
