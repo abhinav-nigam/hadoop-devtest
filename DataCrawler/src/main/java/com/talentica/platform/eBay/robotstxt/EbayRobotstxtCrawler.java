@@ -59,6 +59,12 @@ public class EbayRobotstxtCrawler extends EbayStrategyBase {
 
     public void start(CommonConfig commonConfig) {
         LOGGER.debug("Ebay Robots txt data crawler started");
+        String processingDir = commonConfig.getProcessingDir();
+        startWorkers(processingDir);
+        LOGGER.debug("Ebay Robots txt data crawler Finished");
+    }
+
+    private void getNewEntriesFromSitemap() {
         String url = robotstxtConfig.getSitemapUrl();
         String xml = new RequestHandler().getResponse(url);
         try {
@@ -89,28 +95,44 @@ public class EbayRobotstxtCrawler extends EbayStrategyBase {
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
-        LOGGER.debug("Ebay Robots txt data crawler Finished");
-        String processingDir = commonConfig.getProcessingDir();
-        startWorkers(processingDir);
     }
 
     public void startWorkers(String processingDir) {
         LOGGER.debug("Starting workers for Ebay Robots txt data crawler");
         int threadCount = Runtime.getRuntime().availableProcessors();
+        if (!robotstxtConfig.isShouldExecuteListingsRetriever() && !robotstxtConfig.isShouldExecuteUrlRetriever()) {
+            URL_RETRIEVER_WEIGHTAGE = 0;
+            DATA_EXTRACTOR_WEIGHTAGE = 0;
+        } else if (!robotstxtConfig.isShouldExecuteListingsRetriever()) {
+            URL_RETRIEVER_WEIGHTAGE = 100;
+            DATA_EXTRACTOR_WEIGHTAGE = 0;
+        } else if (!robotstxtConfig.isShouldExecuteUrlRetriever()) {
+            URL_RETRIEVER_WEIGHTAGE = 0;
+            DATA_EXTRACTOR_WEIGHTAGE = 100;
+        }
         long urlRetrieverThreadCount = Math.round((threadCount * URL_RETRIEVER_WEIGHTAGE) / 100.0);
         long dataRetrieverThreadCount = Math.round((threadCount * DATA_EXTRACTOR_WEIGHTAGE) / 100.0);
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-
-        Runnable urlRetriever = new UrlRetriever(sitemapDao, listingDao, urlRetrieverThreadCount, isUrlRetrieverFinished, processingDir);
-        for (int i = 0; i < urlRetrieverThreadCount; i++) {
-            executor.execute(urlRetriever);
+        if (urlRetrieverThreadCount == 0 && robotstxtConfig.isShouldExecuteUrlRetriever()) {
+            urlRetrieverThreadCount = 1;
         }
-
-        Runnable dataExtractor = new DataExtractor(listingDao, isUrlRetrieverFinished, processingDir);
-        for (int i = 0; i < dataRetrieverThreadCount; i++) {
-            executor.execute(dataExtractor);
+        if (dataRetrieverThreadCount == 0 && robotstxtConfig.isShouldExecuteListingsRetriever()) {
+            dataRetrieverThreadCount = 1;
         }
-        executor.shutdown();
+        if(urlRetrieverThreadCount > 0) {
+            this.getNewEntriesFromSitemap();
+            Runnable urlRetriever = new UrlRetriever(sitemapDao, listingDao, urlRetrieverThreadCount, isUrlRetrieverFinished, processingDir);
+            for (int i = 0; i < urlRetrieverThreadCount; i++) {
+                executor.execute(urlRetriever);
+            }
+        }
+        if(dataRetrieverThreadCount > 0) {
+            Runnable dataExtractor = new DataExtractor(listingDao, isUrlRetrieverFinished, processingDir);
+            for (int i = 0; i < dataRetrieverThreadCount; i++) {
+                executor.execute(dataExtractor);
+            }
+            executor.shutdown();
+        }
     }
 
     private RobotstxtConfig loadConfiguration(String filePath) {

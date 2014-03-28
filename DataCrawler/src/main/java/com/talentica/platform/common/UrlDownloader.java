@@ -52,7 +52,10 @@ public class UrlDownloader {
         int periodIndex = fAddress.lastIndexOf('.');
 
         String fileName = fAddress.substring(slashIndex + 1);
-
+        File destinationFile = new File(destinationDir);
+        if (!destinationFile.exists()) {
+            destinationFile.mkdirs();
+        }
         if (periodIndex >= 1 && slashIndex >= 0
                 && slashIndex < fAddress.length() - 1) {
             fileUrl(fAddress, fileName, destinationDir);

@@ -104,7 +104,6 @@ public class UrlRetriever implements Runnable {
                     }
                 }
             }
-
         } catch (Exception ex) {
             LOGGER.error("Error in processing xml file : " + xmlFilePath + " :: " + ex.getMessage());
             ex.printStackTrace();

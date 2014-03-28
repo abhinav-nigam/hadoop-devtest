@@ -170,7 +170,6 @@ public class DataExtractor implements Runnable {
         }
     }
 
-
     private String getCategoryTree(TagNode rootHtml) throws XPatherException {
         String categoryTree = "";
         Object[] categories = rootHtml.evaluateXPath(DataExtractorConstants.XPATH_CATEGORY_TREE);
@@ -347,6 +346,10 @@ public class DataExtractor implements Runnable {
     private String createDataFile() {
         File outputDataFile = null;
         try {
+            File dataDirectory = new File(processingDir + File.separator + "ebay");
+            if (!dataDirectory.exists()) {
+                dataDirectory.mkdirs();
+            }
             outputDataFile = new File(processingDir + File.separator + "ebay" + File.separator + "data.xls");
             this.fileOutputStream = new FileOutputStream(outputDataFile, true);
             this.writeHeadersToDataFile();

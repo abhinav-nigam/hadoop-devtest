@@ -22,5 +22,4 @@ public class DataExtractorConstants {
     public static final String XPATH_SELLER_FEEDBACK = "//div[@class='si-cnt si-cnt-eu vi-grBr vi-padn0 c-std']/div/div[@class='si-inner']/div[@class='si-content']/div[contains(@class,'bdg-')]/div[@id='si-fb']";
     public static final String XPATH_ITEM_SPECIFICS = "//div[@class='section']/h2[@class='secHd']";
     public static final String XPATH_ITEM_IMAGE = "//img[@id='icImg']/@src";
-
 }
