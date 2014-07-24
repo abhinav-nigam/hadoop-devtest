@@ -1,0 +1,24 @@
+# --------------------------------------------------- #
+# Configuration File for ebay robots txt Data Crawler #
+# --------------------------------------------------- #
+
+# --------------------------------------------------- #
+# Database configuration                              #
+# --------------------------------------------------- #
+dbUrl: jdbc:postgresql://localhost:5432/crawler_db?user=postgres&password=postgres
+
+# --------------------------------------------------- #
+# Sitemap URL                                         #
+# --------------------------------------------------- #
+sitemapUrl: http://www.ebay.com/lst/VIP_US_index.xml
+
+# --------------------------------------------------- #
+# Program Settings  #
+# --------------------------------------------------- #
+shouldExecuteUrlRetriever: YES
+shouldExecuteListingsRetriever: YES
+
+
+
+
+
