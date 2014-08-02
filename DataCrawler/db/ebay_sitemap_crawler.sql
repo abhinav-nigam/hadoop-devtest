@@ -3,9 +3,9 @@ CREATE DATABASE crawler_db
   WITH OWNER = postgres
        ENCODING = 'UTF8'
        TABLESPACE = pg_default
-       LC_COLLATE = 'English_India.1252'
-       LC_CTYPE = 'English_India.1252'
        CONNECTION LIMIT = -1;
+
+\connect crawler_db
 
 -- Table sitemap_urls_queue create script
 CREATE TABLE sitemap_urls_queue

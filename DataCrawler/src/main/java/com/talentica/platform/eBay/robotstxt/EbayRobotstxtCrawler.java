@@ -40,7 +40,7 @@ public class EbayRobotstxtCrawler extends EbayStrategyBase {
     private int URL_RETRIEVER_WEIGHTAGE = 10;
     private int DATA_EXTRACTOR_WEIGHTAGE = 90;
 
-    private final String CONFIG_FILE_PATH = "\\src\\main\\java\\com\\talentica\\platform\\eBay\\robotstxt\\config\\robotstxt-configuration.yml";
+    private final String CONFIG_FILE_PATH = "/src/main/java/com/talentica/platform/eBay/robotstxt/config/robotstxt-configuration.yml";
 
     private AtomicBoolean isUrlRetrieverFinished = new AtomicBoolean(false);
     private SitemapDao sitemapDao;

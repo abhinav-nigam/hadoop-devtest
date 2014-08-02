@@ -17,7 +17,16 @@ ____________________________________________________________
 Setup steps:
 ____________________________________________________________
 1). Install above components
+  - Postgres installation:
+    Create new file /etc/apt/sources.list.d/pgdg.list and insert the following line
+        deb http://apt.postgresql.org/pub/repos/apt/ <your-ubuntu-release>-pgdg main
+    You can know your ubuntu release using lsb_release -c
+    Run the following commands:
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        sudo apt-get update
+        sudo apt-get install postgresql-9.2 pgadmin3
 2). Run the scripts from db folder
+    psql -f ebay_sitemap_crawler.sql
 
 How To RUN:
 1). Open the program only input- common-configuration.yml
