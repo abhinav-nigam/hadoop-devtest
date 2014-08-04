@@ -1,0 +1,5 @@
+dumbo start findUserSessionMean.py -input user_sessions -output temp123
+
+dumbo start findUserSessionMean.py -hadoop /usr/lib/hadoop -input /user/manishz/input/user_sessions -output /user/manishz/output/question1
+
+dumbo cat /user/manishz/output/question1/part-* -hadoop /usr/lib/hadoop
