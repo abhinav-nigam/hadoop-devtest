@@ -1,0 +1,5 @@
+dumbo start findCommonFnds.py -input fnd_list_4 -output temp123
+
+dumbo start findCommonFnds.py -hadoop /usr/lib/hadoop  -input /user/manishz/input/fnd_list_4 -output /user/manishz/output/question4
+
+dumbo cat /user/manishz/output/question4/part-* -hadoop /usr/lib/hadoop

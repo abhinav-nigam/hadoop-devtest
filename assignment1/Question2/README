@@ -1,0 +1,5 @@
+dumbo start findUserSessionMean.py -input user_sessions -output temp123
+
+dumbo start sqlQueries.py -hadoop /usr/lib/hadoop -libjar ../packages/feathers.jar -getpath yes -input /user/manishz/input/tab_data -output /user/manishz/output/question2
+
+dumbo cat /user/manishz/output/question2/query1/part-* -hadoop /usr/lib/hadoop
